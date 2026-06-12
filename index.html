@@ -589,6 +589,10 @@
                 rowWrapper.className = `group flex items-center justify-between py-2 px-3 my-1 rounded-lg transition-all duration-150 cursor-grab active:cursor-grabbing border border-transparent ${
                     isFolder ? 'hover:bg-slate-800/50' : 'hover:bg-slate-800/30'
                 }`;
+                if (currentDropTargetId === node.id) {
+                    currentDropTargetId = null;
+                    currentDropPosition = null;
+                }
             });
 
             rowWrapper.addEventListener('drop', (e) => {
@@ -1143,6 +1147,8 @@
                 showToast(`Added "${finalNode.title}" to workspace root.`);
                 draggedNode = null;
                 dragSource = null;
+                currentDropTargetId = null;
+                currentDropPosition = null;
                 renderTrees();
             });
 
