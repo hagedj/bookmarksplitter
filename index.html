@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bookmark Splitter Pro - Workspace</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        slate: {
+                            950: '#030712',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom scrollbar styling */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(30, 41, 59, 0.3);
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.3);
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(148, 163, 184, 0.5);
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-900 text-slate-100 flex flex-col font-sans overflow-x-hidden">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
+
+    <!-- Header Panel -->
+    <header class="border-b border-slate-800 bg-slate-950/80 backdrop-blur-md sticky top-0 z-30 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-gradient-to-tr from-indigo-500 to-violet-500 p-2.5 rounded-xl shadow-lg shadow-indigo-500/20">
+                    <!-- Layers SVG Icon -->
+                    <svg class="text-white" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m12 3-10 5 10 5 10-5-10-5Z"/>
+                        <path d="m2 17 10 5 10-5"/>
+                        <path d="m2 12 10 5 10-5"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold bg-gradient-to-r from-white via-slate-200 to-indigo-300 bg-clip-text text-transparent">
+                        Bookmark Splitter
+                    </h1>
+                    <p class="text-xs text-slate-400">
+                        Drag, arrange, and export customized subsets of your bookmark collections.
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button
+                    id="load-demo-btn"
+                    class="px-3.5 py-1.5 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-slate-700 rounded-lg transition-all flex items-center gap-1.5"
+                >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                        <path d="M3 3v5h5"/>
+                        <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
+                        <path d="M16 16h5v5"/>
+                    </svg>
+                    Load Sample Data
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container Area -->
+    <main class="max-w-7xl w-full mx-auto p-4 sm:p-6 flex-1 flex flex-col lg:flex-row gap-6 min-h-0">
+        
+        <!-- Left Pane (Source/Uploader) -->
+        <section class="flex-1 bg-slate-950/40 border border-slate-800 rounded-2xl flex flex-col overflow-hidden shadow-xl backdrop-blur-sm">
+            <div class="p-4 border-b border-slate-800/60 bg-slate-950/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                    <h2 class="text-base font-bold text-slate-200 flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                        Source Bookmarks
+                    </h2>
+                    <p class="text-xs text-slate-500">
+                        Upload your export or browse imported bookmark tree lists
+                    </p>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <input type="file" id="file-uploader" accept=".html" class="hidden" />
+                    <button
+                        id="upload-trigger-btn"
+                        class="px-3.5 py-2 text-xs font-medium bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white rounded-lg shadow-lg shadow-emerald-700/10 transition-all flex items-center gap-1.5"
+                    >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="17 8 12 3 7 8"/>
+                            <line x1="12" x2="12" y1="3" y2="15"/>
+                        </svg>
+                        Upload HTML
+                    </button>
+                </div>
+            </div>
+
+            <!-- Left Filter & Search -->
+            <div class="p-3 border-b border-slate-800 bg-slate-900/20">
+                <div class="relative">
+                    <svg class="absolute left-3 top-2.5 text-slate-500" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="m21 21-4.3-4.3"/>
+                    </svg>
+                    <input
+                        type="text"
+                        id="left-search"
+                        placeholder="Search source bookmarks..."
+                        class="w-full bg-slate-900/60 border border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-lg py-1.5 pl-10 pr-10 text-sm text-slate-200 placeholder-slate-500 transition-all"
+                    />
+                    <button id="left-search-clear" class="hidden absolute right-3 top-2.5 text-slate-500 hover:text-slate-300">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Left Tree Content -->
+            <div id="left-tree-panel" class="flex-1 overflow-y-auto p-4 custom-scrollbar min-h-[300px] max-h-[500px] lg:max-h-[calc(100vh-320px)] bg-slate-950/20">
+                <!-- Dynamic Content Rendered Here -->
+            </div>
+        </section>
+
+        <!-- Transition Arrow Indicator on Large Screens -->
+        <div class="hidden lg:flex items-center justify-center self-center text-slate-600">
+            <svg class="animate-pulse" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+            </svg>
+        </div>
+
+        <!-- Right Pane (Workspace/Editor) -->
+        <section 
+            id="right-workspace-pane"
+            class="flex-1 bg-slate-950/40 border border-slate-800 rounded-2xl flex flex-col overflow-hidden shadow-xl backdrop-blur-sm"
+        >
+            <div class="p-4 border-b border-slate-800/60 bg-slate-950/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                    <h2 class="text-base font-bold text-slate-200 flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
+                        Split Workspace
+                    </h2>
+                    <p class="text-xs text-slate-500">
+                        Reorder, create folders, edit info, and compile your new output file
+                    </p>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <button
+                        id="add-folder-btn"
+                        class="px-3 py-2 text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded-lg transition-all flex items-center gap-1.5"
+                        title="Create a new empty directory folder inside this workspace"
+                    >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                        Add Folder
+                    </button>
+                    <button
+                        id="export-btn"
+                        class="px-3.5 py-2 text-xs font-medium bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white rounded-lg shadow-lg shadow-indigo-700/10 transition-all flex items-center gap-1.5"
+                        title="Export entire current workspace structure to high-compatibility browser HTML"
+                    >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="7 10 12 15 17 10"/>
+                            <line x1="12" x2="12" y1="15" y2="3"/>
+                        </svg>
+                        Export Output
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right Filter & Search -->
+            <div class="p-3 border-b border-slate-800 bg-slate-900/20">
+                <div class="relative">
+                    <svg class="absolute left-3 top-2.5 text-slate-500" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="m21 21-4.3-4.3"/>
+                    </svg>
+                    <input
+                        type="text"
+                        id="right-search"
+                        placeholder="Search workspace bookmarks..."
+                        class="w-full bg-slate-900/60 border border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-lg py-1.5 pl-10 pr-10 text-sm text-slate-200 placeholder-slate-500 transition-all"
+                    />
+                    <button id="right-search-clear" class="hidden absolute right-3 top-2.5 text-slate-500 hover:text-slate-300">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right Tree Content -->
+            <div id="right-tree-panel" class="flex-1 overflow-y-auto p-4 custom-scrollbar min-h-[300px] max-h-[500px] lg:max-h-[calc(100vh-320px)] bg-slate-950/10 relative">
+                <!-- Dynamic Content Rendered Here -->
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // --- Core Application State ---
+        let leftTree = [];
+        let rightTree = [];
+        let leftFilter = '';
+        let rightFilter = '';
+        
+        const leftCollapsed = new Set();
+        const rightCollapsed = new Set();
+        
+        let editingNode = null; // { id, title, type, url }
+        let draggedNode = null;
+        let dragSource = null; // 'left' | 'right'
+        let currentDropTargetId = null;
+        let currentDropPosition = null; // 'before' | 'after' | 'inside'
+
+        // --- Demo Data ---
+        const DEMO_BOOKMARKS = [
+            {
+                id: 'demo-f1',
+                type: 'folder',
+                title: 'Development Resources',
+                children: [
+                    {
+                        id: 'demo-f1-s1',
+                        type: 'folder',
+                        title: 'Frontend Frameworks',
+                        children: [
+                            { id: 'demo-b1', type: 'bookmark', title: 'React Documentation', url: 'https://react.dev' },
+                            { id: 'demo-b2', type: 'bookmark', title: 'Tailwind CSS Docs', url: 'https://tailwindcss.com' },
+                            { id: 'demo-b3', type: 'bookmark', title: 'Vite Bundler', url: 'https://vitejs.dev' }
+                        ]
+                    },
+                    {
+                        id: 'demo-f1-s2',
+                        type: 'folder',
+                        title: 'Learning & Tutorials',
+                        children: [
+                            { id: 'demo-b4', type: 'bookmark', title: 'MDN Web Docs', url: 'https://developer.mozilla.org' },
+                            { id: 'demo-b5', type: 'bookmark', title: 'JavaScript.info', url: 'https://javascript.info' }
+                        ]
+                    },
+                    { id: 'demo-b6', type: 'bookmark', title: 'GitHub', url: 'https://github.com' }
+                ]
+            },
+            {
+                id: 'demo-f2',
+                type: 'folder',
+                title: 'Design Inspiration',
+                children: [
+                    { id: 'demo-b7', type: 'bookmark', title: 'Dribbble', url: 'https://dribbble.com' },
+                    { id: 'demo-b8', type: 'bookmark', title: 'Figma Community', url: 'https://figma.com/community' },
+                    { id: 'demo-b9', type: 'bookmark', title: 'Awwwards', url: 'https://www.awwwards.com' }
+                ]
+            },
+            { id: 'demo-b10', type: 'bookmark', title: 'Google Search', url: 'https://google.com' }
+        ];
+
+        // --- SVGs Mapping Helpers ---
+        const SVG_ICONS = {
+            folder: `<svg class="text-amber-500 flex-shrink-0" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>`,
+            'folder-open': `<svg class="text-amber-400 flex-shrink-0" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/><path d="M2 10h20"/></svg>`,
+            file: `<svg class="text-blue-500 flex-shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>`,
+            chevronRight: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>`,
+            chevronDown: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>`,
+            external: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/></svg>`,
+            edit: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>`,
+            trash: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>`,
+            check: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>`,
+            x: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>`
+        };
+
+        // --- Toast System ---
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            let bgClass = 'bg-emerald-950 border-emerald-800 text-emerald-200';
+            if (type === 'error') bgClass = 'bg-red-950 border-red-800 text-red-200';
+            if (type === 'info') bgClass = 'bg-blue-950 border-blue-800 text-blue-200';
+
+            toast.className = `px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 border transition-all transform duration-300 opacity-0 translate-y-2 ${bgClass}`;
+            toast.innerHTML = `
+                <div class="p-1 rounded-full bg-black/20">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275Z"/>
+                    </svg>
+                </div>
+                <span class="text-sm font-medium">${message}</span>
+            `;
+
+            container.appendChild(toast);
+            
+            // Trigger animation
+            setTimeout(() => {
+                toast.classList.remove('opacity-0', 'translate-y-2');
+            }, 10);
+
+            // Auto-removal
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        // --- ID Generator Helper ---
+        function generateUniqueId(prefix = 'node') {
+            return `${prefix}-${Math.random().toString(36).substr(2, 9)}-${Date.now().toString(36)}`;
+        }
+
+        // --- Recursive Tree Cloning (reassign IDs) ---
+        function cloneTreeWithNewIds(node) {
+            const newId = generateUniqueId(node.type === 'folder' ? 'folder-r' : 'bookmark-r');
+            if (node.type === 'folder') {
+                return {
+                    ...node,
+                    id: newId,
+                    children: node.children ? node.children.map(cloneTreeWithNewIds) : []
+                };
+            } else {
+                return {
+                    ...node,
+                    id: newId
+                };
+            }
+        }
+
+        // --- Count Total Bookmarks Recursively ---
+        function countBookmarks(nodes) {
+            let count = 0;
+            const countFn = (items) => {
+                items.forEach(item => {
+                    if (item.type === 'bookmark') count++;
+                    else if (item.children) countFn(item.children);
+                });
+            };
+            countFn(nodes);
+            return count;
+        }
+
+        // --- Find a Node Recursively inside Tree ---
+        function findNodeById(nodes, targetId) {
+            for (let node of nodes) {
+                if (node.id === targetId) return node;
+                if (node.type === 'folder' && node.children) {
+                    const found = findNodeById(node.children, targetId);
+                    if (found) return found;
+                }
+            }
+            return null;
+        }
+
+        // --- Deep Copy standard JS Object ---
+        function deepCopy(obj) {
+            return JSON.parse(JSON.stringify(obj));
+        }
+
+        // --- Netscape Bookmark HTML Parser ---
+        function parseBookmarkHTML(htmlText) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(htmlText, 'text/html');
+            
+            const traverse = (element) => {
+                const list = [];
+                const children = element.children;
+                
+                for (let i = 0; i < children.length; i++) {
+                    const child = children[i];
+                    
+                    if (child.tagName === 'DT') {
+                        const h3 = child.querySelector(':scope > h3');
+                        const a = child.querySelector(':scope > a');
+                        
+                        if (h3) {
+                            let dl = child.querySelector(':scope > dl');
+                            if (!dl) {
+                                let next = child.nextElementSibling;
+                                if (next && next.tagName === 'DL') {
+                                    dl = next;
+                                }
+                            }
+                            list.push({
+                                id: generateUniqueId('folder-l'),
+                                type: 'folder',
+                                title: h3.textContent.trim() || 'Untitled Folder',
+                                children: dl ? traverse(dl) : []
+                            });
+                        } else if (a) {
+                            list.push({
+                                id: generateUniqueId('bookmark-l'),
+                                type: 'bookmark',
+                                title: a.textContent.trim() || 'Untitled Link',
+                                url: a.getAttribute('href') || 'https://'
+                            });
+                        }
+                    } else if (child.tagName === 'DL') {
+                        list.push(...traverse(child));
+                    }
+                }
+                return list;
+            };
+
+            const firstDL = doc.querySelector('dl');
+            if (firstDL) {
+                return traverse(firstDL);
+            }
+            return traverse(doc.body);
+        }
+
+        // --- Tree Modifier Utility Functions ---
+        function removeItemFromTree(tree, targetId) {
+            return tree
+                .filter(node => node.id !== targetId)
+                .map(node => {
+                    if (node.type === 'folder' && node.children) {
+                        return {
+                            ...node,
+                            children: removeItemFromTree(node.children, targetId)
+                        };
+                    }
+                    return node;
+                });
+        }
+
+        function updateItemInTree(tree, targetId, fieldsToUpdate) {
+            return tree.map(node => {
+                if (node.id === targetId) {
+                    return { ...node, ...fieldsToUpdate };
+                }
+                if (node.type === 'folder' && node.children) {
+                    return {
+                        ...node,
+                        children: updateItemInTree(node.children, targetId, fieldsToUpdate)
+                    };
+                }
+                return node;
+            });
+        }
+
+        function insertItemIntoTree(tree, targetId, nodeToInsert, position) {
+            if (!targetId && position === 'root') {
+                return [...tree, nodeToInsert];
+            }
+
+            const result = [];
+            for (let i = 0; i < tree.length; i++) {
+                const current = tree[i];
+
+                if (current.id === targetId) {
+                    if (position === 'before') {
+                        result.push(nodeToInsert);
+                        result.push(current);
+                    } else if (position === 'after') {
+                        result.push(current);
+                        result.push(nodeToInsert);
+                    } else if (position === 'inside') {
+                        result.push({
+                            ...current,
+                            children: current.children ? [nodeToInsert, ...current.children] : [nodeToInsert]
+                        });
+                    }
+                } else {
+                    if (current.type === 'folder' && current.children) {
+                        result.push({
+                            ...current,
+                            children: insertItemIntoTree(current.children, targetId, nodeToInsert, position)
+                        });
+                    } else {
+                        result.push(current);
+                    }
+                }
+            }
+            return result;
+        }
+
+        // --- Filter bookmarks by search queries ---
+        function filterNodes(nodes, query) {
+            if (!query) return nodes;
+            const lowerQuery = query.toLowerCase();
+
+            const matchesFilter = (node) => {
+                if (node.title.toLowerCase().includes(lowerQuery)) return true;
+                if (node.type === 'bookmark' && node.url && node.url.toLowerCase().includes(lowerQuery)) return true;
+                if (node.type === 'folder' && node.children) {
+                    return node.children.some(matchesFilter);
+                }
+                return false;
+            };
+
+            const pruneTree = (items) => {
+                return items
+                    .filter(matchesFilter)
+                    .map(item => {
+                        if (item.type === 'folder' && item.children) {
+                            return {
+                                ...item,
+                                children: pruneTree(item.children)
+                            };
+                        }
+                        return item;
+                    });
+            };
+
+            return pruneTree(nodes);
+        }
+
+        // Check if node is nested child of potential parent (prevention loop checks)
+        function isDescendant(parent, possibleChildId) {
+            if (!parent.children) return false;
+            if (parent.children.some(c => c.id === possibleChildId)) return true;
+            return parent.children.some(c => isDescendant(c, possibleChildId));
+        }
+
+        // --- Recusive DOM Element Generator (High Performance) ---
+        function createTreeElement(node, side) {
+            const isFolder = node.type === 'folder';
+            const collapsedSet = side === 'left' ? leftCollapsed : rightCollapsed;
+            const isCollapsed = collapsedSet.has(node.id);
+            const isEditing = editingNode && editingNode.id === node.id;
+
+            const elementContainer = document.createElement('div');
+            elementContainer.className = "select-none";
+            
+            // Build Main Row Wrapper
+            const rowWrapper = document.createElement('div');
+            rowWrapper.setAttribute('draggable', true);
+            rowWrapper.className = `group flex items-center justify-between py-2 px-3 my-1 rounded-lg transition-all duration-150 cursor-grab active:cursor-grabbing border border-transparent ${
+                isFolder ? 'hover:bg-slate-800/50' : 'hover:bg-slate-800/30'
+            }`;
+
+            // Attach HTML5 Drag and Drop events
+            rowWrapper.addEventListener('dragstart', (e) => {
+                e.stopPropagation();
+                draggedNode = node;
+                dragSource = side;
+                e.dataTransfer.setData('text/plain', node.title);
+                e.dataTransfer.effectAllowed = 'move';
+            });
+
+            rowWrapper.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+
+                if (!draggedNode) return;
+                if (draggedNode.id === node.id) return; // Prevent drag over self
+
+                // Calculate relative drop cursor placement (before, after, inside)
+                const rect = rowWrapper.getBoundingClientRect();
+                const relativeY = e.clientY - rect.top;
+                const height = rect.height;
+                let position = 'inside';
+
+                if (isFolder) {
+                    if (relativeY < height * 0.25) position = 'before';
+                    else if (relativeY > height * 0.75) position = 'after';
+                } else {
+                    position = relativeY < height * 0.5 ? 'before' : 'after';
+                }
+
+                currentDropTargetId = node.id;
+                currentDropPosition = position;
+
+                // Visual target styles
+                rowWrapper.className = `group flex items-center justify-between py-2 px-3 my-1 rounded-lg transition-all duration-150 cursor-grab active:cursor-grabbing border ${
+                    position === 'before' ? 'border-t-2 border-indigo-500 bg-indigo-50/20 border-b-transparent border-l-transparent border-r-transparent' :
+                    position === 'after' ? 'border-b-2 border-indigo-500 bg-indigo-50/20 border-t-transparent border-l-transparent border-r-transparent' :
+                    'border-2 border-dashed border-indigo-400 bg-indigo-500/10 scale-[0.98]'
+                }`;
+            });
+
+            rowWrapper.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                rowWrapper.className = `group flex items-center justify-between py-2 px-3 my-1 rounded-lg transition-all duration-150 cursor-grab active:cursor-grabbing border border-transparent ${
+                    isFolder ? 'hover:bg-slate-800/50' : 'hover:bg-slate-800/30'
+                }`;
+            });
+
+            rowWrapper.addEventListener('drop', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+
+                if (!draggedNode) return;
+                const position = currentDropPosition || 'inside';
+                
+                // Clear active target states
+                currentDropTargetId = null;
+                currentDropPosition = null;
+
+                // Move/Clone parsing
+                const finalNode = dragSource === 'left' ? cloneTreeWithNewIds(draggedNode) : draggedNode;
+                let updatedRightTree = [...rightTree];
+
+                if (dragSource === 'right') {
+                    // Pre-prevent infinite hierarchy recursion loop checks
+                    if (draggedNode.type === 'folder' && (draggedNode.id === node.id || isDescendant(draggedNode, node.id))) {
+                        showToast("Cannot move a folder inside itself or its children!", "error");
+                        draggedNode = null;
+                        dragSource = null;
+                        renderTrees();
+                        return;
+                    }
+                    updatedRightTree = removeItemFromTree(updatedRightTree, draggedNode.id);
+                }
+
+                updatedRightTree = insertItemIntoTree(updatedRightTree, node.id, finalNode, position);
+                rightTree = updatedRightTree;
+
+                showToast(
+                    dragSource === 'left' 
+                        ? `Cloned "${finalNode.title}" into workspace!` 
+                        : `Moved "${finalNode.title}" within workspace!`
+                );
+
+                draggedNode = null;
+                dragSource = null;
+                renderTrees();
+            });
+
+            // Left Side Content Structuring
+            const leftContentArea = document.createElement('div');
+            leftContentArea.className = "flex items-center min-w-0 flex-1 gap-2";
+
+            // Folders Collapse chevron button
+            if (isFolder) {
+                const arrowBtn = document.createElement('button');
+                arrowBtn.className = "p-0.5 hover:bg-slate-700 rounded transition text-slate-400 hover:text-slate-200";
+                arrowBtn.innerHTML = isCollapsed ? SVG_ICONS.chevronRight : SVG_ICONS.chevronDown;
+                arrowBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (isCollapsed) {
+                        collapsedSet.delete(node.id);
+                    } else {
+                        collapsedSet.add(node.id);
+                    }
+                    renderTrees();
+                });
+                leftContentArea.appendChild(arrowBtn);
+            } else {
+                const dotSpan = document.createElement('span');
+                dotSpan.className = "w-5 flex justify-center";
+                dotSpan.innerHTML = '<span class="w-1.5 h-1.5 bg-slate-500 rounded-full"></span>';
+                leftContentArea.appendChild(dotSpan);
+            }
+
+            // Folder/File Icon
+            const iconSpan = document.createElement('span');
+            iconSpan.innerHTML = isFolder 
+                ? (isCollapsed ? SVG_ICONS.folder : SVG_ICONS['folder-open']) 
+                : SVG_ICONS.file;
+            leftContentArea.appendChild(iconSpan);
+
+            // Inline Input Editing block OR standard displays
+            if (isEditing) {
+                const formBlock = document.createElement('div');
+                formBlock.className = "flex flex-col gap-1.5 w-full mr-2 py-1";
+                formBlock.addEventListener('click', e => e.stopPropagation());
+
+                const nameInput = document.createElement('input');
+                nameInput.type = "text";
+                nameInput.value = editingNode.title;
+                nameInput.placeholder = "Title";
+                nameInput.className = "px-2 py-1 text-sm bg-slate-800 text-slate-100 border border-slate-700 rounded focus:outline-none focus:ring-1 focus:ring-indigo-500";
+                nameInput.addEventListener('keydown', (e) => e.key === 'Enter' && triggerSaveInlineEdit());
+                formBlock.appendChild(nameInput);
+
+                let urlInput = null;
+                if (!isFolder) {
+                    urlInput = document.createElement('input');
+                    urlInput.type = "text";
+                    urlInput.value = editingNode.url || '';
+                    urlInput.placeholder = "https://";
+                    urlInput.className = "px-2 py-1 text-xs bg-slate-800 text-slate-300 border border-slate-700 rounded focus:outline-none focus:ring-1 focus:ring-indigo-500";
+                    urlInput.addEventListener('keydown', (e) => e.key === 'Enter' && triggerSaveInlineEdit());
+                    formBlock.appendChild(urlInput);
+                }
+
+                // Control panel buttons inside input
+                const buttonsWrap = document.createElement('div');
+                buttonsWrap.className = "flex gap-1 justify-end";
+
+                const cancelBtn = document.createElement('button');
+                cancelBtn.className = "p-1 text-slate-400 hover:text-slate-200 bg-slate-800 hover:bg-slate-700 rounded text-xs";
+                cancelBtn.innerHTML = SVG_ICONS.x;
+                cancelBtn.addEventListener('click', () => {
+                    editingNode = null;
+                    renderTrees();
+                });
+
+                const saveBtn = document.createElement('button');
+                saveBtn.className = "p-1 text-white bg-indigo-600 hover:bg-indigo-700 rounded text-xs flex items-center gap-0.5";
+                saveBtn.innerHTML = SVG_ICONS.check;
+                saveBtn.addEventListener('click', () => {
+                    editingNode.title = nameInput.value;
+                    if (urlInput) editingNode.url = urlInput.value;
+                    triggerSaveInlineEdit();
+                });
+
+                buttonsWrap.appendChild(cancelBtn);
+                buttonsWrap.appendChild(saveBtn);
+                formBlock.appendChild(buttonsWrap);
+                leftContentArea.appendChild(formBlock);
+            } else {
+                const textBlock = document.createElement('div');
+                textBlock.className = "min-w-0 flex-1 leading-snug";
+                
+                const titleP = document.createElement('p');
+                titleP.className = "text-sm font-medium text-slate-200 truncate";
+                titleP.textContent = node.title;
+                textBlock.appendChild(titleP);
+
+                if (!isFolder && node.url) {
+                    const urlP = document.createElement('p');
+                    urlP.className = "text-xs text-slate-500 truncate font-mono";
+                    urlP.textContent = node.url;
+                    textBlock.appendChild(urlP);
+                }
+                leftContentArea.appendChild(textBlock);
+            }
+
+            rowWrapper.appendChild(leftContentArea);
+
+            // Right Action Controls Panel (Hover Triggered)
+            if (!isEditing) {
+                const actionWrap = document.createElement('div');
+                actionWrap.className = "flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity";
+
+                if (!isFolder && node.url) {
+                    const externalLink = document.createElement('a');
+                    externalLink.href = node.url;
+                    externalLink.target = "_blank";
+                    externalLink.rel = "noopener noreferrer";
+                    externalLink.className = "p-1 hover:bg-slate-700 text-slate-400 hover:text-slate-200 rounded";
+                    externalLink.innerHTML = SVG_ICONS.external;
+                    externalLink.addEventListener('click', e => e.stopPropagation());
+                    actionWrap.appendChild(externalLink);
+                }
+
+                if (side === 'right') {
+                    const editBtn = document.createElement('button');
+                    editBtn.className = "p-1 hover:bg-slate-700 text-indigo-400 hover:text-indigo-300 rounded";
+                    editBtn.innerHTML = SVG_ICONS.edit;
+                    editBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        editingNode = {
+                            id: node.id,
+                            title: node.title,
+                            type: node.type,
+                            url: node.url || ''
+                        };
+                        renderTrees();
+                    });
+
+                    const trashBtn = document.createElement('button');
+                    trashBtn.className = "p-1 hover:bg-red-950/50 text-red-400 hover:text-red-300 rounded";
+                    trashBtn.innerHTML = SVG_ICONS.trash;
+                    trashBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        rightTree = removeItemFromTree(rightTree, node.id);
+                        showToast("Removed item from workspace.");
+                        renderTrees();
+                    });
+
+                    actionWrap.appendChild(editBtn);
+                    actionWrap.appendChild(trashBtn);
+                }
+
+                rowWrapper.appendChild(actionWrap);
+            }
+
+            elementContainer.appendChild(rowWrapper);
+
+            // Nested Folder Recursion children blocks
+            if (isFolder && !isCollapsed && node.children) {
+                const childrenWrapper = document.createElement('div');
+                childrenWrapper.className = "mt-0.5 ml-4 pl-4 border-l-2 border-slate-800/80";
+
+                if (node.children.length === 0) {
+                    const emptyP = document.createElement('p');
+                    emptyP.className = "text-xs text-slate-500 italic py-1";
+                    emptyP.textContent = "(Empty Folder)";
+                    childrenWrapper.appendChild(emptyP);
+                } else {
+                    node.children.forEach(child => {
+                        childrenWrapper.appendChild(createTreeElement(child, side));
+                    });
+                }
+                elementContainer.appendChild(childrenWrapper);
+            }
+
+            return elementContainer;
+        }
+
+        // --- Save Inline Changes into State ---
+        function triggerSaveInlineEdit() {
+            if (!editingNode) return;
+            const updates = { title: editingNode.title };
+            if (editingNode.type === 'bookmark') {
+                updates.url = editingNode.url;
+            }
+            rightTree = updateItemInTree(rightTree, editingNode.id, updates);
+            editingNode = null;
+            showToast("Saved edits successfully.");
+            renderTrees();
+        }
+
+        // --- Main Rendering Engine ---
+        function renderTrees() {
+            // Retrieve Filtered Lists
+            const filteredLeft = filterNodes(leftTree, leftFilter);
+            const filteredRight = filterNodes(rightTree, rightFilter);
+
+            // Left Panel View Construction
+            const leftContainer = document.getElementById('left-tree-panel');
+            leftContainer.innerHTML = ''; // Reset UI panel
+            
+            if (leftTree.length === 0) {
+                leftContainer.innerHTML = `
+                    <div class="h-full flex flex-col items-center justify-center text-center p-6 border-2 border-dashed border-slate-800 rounded-xl my-4">
+                        <svg class="text-slate-600 mb-3 animate-bounce" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/>
+                        </svg>
+                        <h3 class="text-sm font-semibold text-slate-300">No Bookmarks Loaded</h3>
+                        <p class="text-xs text-slate-500 max-w-xs mt-1 mb-4">
+                            Upload an exported bookmark HTML file from your browser, or load our sample dataset to experiment.
+                        </p>
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <button onclick="document.getElementById('file-uploader').click()" class="px-4 py-2 text-xs font-semibold bg-slate-850 hover:bg-slate-700 text-slate-200 rounded-lg transition border border-slate-750">
+                                Choose File
+                            </button>
+                            <button id="demo-fallback-btn" class="px-4 py-2 text-xs font-semibold bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-400 rounded-lg transition border border-indigo-500/20">
+                                Use Sample Demo
+                            </button>
+                        </div>
+                    </div>
+                `;
+                document.getElementById('demo-fallback-btn')?.addEventListener('click', loadDemoData);
+            } else if (filteredLeft.length === 0) {
+                leftContainer.innerHTML = `
+                    <div class="text-center py-12">
+                        <svg class="text-slate-600 mx-auto mb-2" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                        <p class="text-sm text-slate-400">No matching bookmarks found.</p>
+                        <button id="clear-left-search-link" class="text-xs text-indigo-400 underline mt-1">Clear search</button>
+                    </div>
+                `;
+                document.getElementById('clear-left-search-link')?.addEventListener('click', () => {
+                    document.getElementById('left-search').value = '';
+                    leftFilter = '';
+                    document.getElementById('left-search-clear').classList.add('hidden');
+                    renderTrees();
+                });
+            } else {
+                const headerBadge = document.createElement('div');
+                headerBadge.className = "bg-slate-900/40 p-2 rounded-lg text-xs text-slate-400 mb-3 flex items-center justify-between border border-slate-800/40";
+                headerBadge.innerHTML = `
+                    <span>💡 Drag individual nodes or entire folders to the right.</span>
+                    <span class="font-semibold text-slate-300">Total: ${countBookmarks(leftTree)}</span>
+                `;
+                leftContainer.appendChild(headerBadge);
+                
+                filteredLeft.forEach(node => {
+                    leftContainer.appendChild(createTreeElement(node, 'left'));
+                });
+            }
+
+            // Right Panel View Construction
+            const rightContainer = document.getElementById('right-tree-panel');
+            rightContainer.innerHTML = ''; // Reset UI panel
+
+            if (rightTree.length === 0) {
+                rightContainer.innerHTML = `
+                    <div class="absolute inset-4 border-2 border-dashed border-slate-800/80 rounded-xl flex flex-col items-center justify-center text-center p-6">
+                        <div class="bg-slate-900 p-3 rounded-full text-indigo-400 mb-3 border border-slate-800/50">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                        </div>
+                        <h3 class="text-sm font-semibold text-slate-300">Your Workspace is Empty</h3>
+                        <p class="text-xs text-slate-500 max-w-xs mt-1">
+                            Drag items from the left pane here to assemble your customized collection. Drag folders into folders to nest.
+                        </p>
+                        <div class="mt-4 flex gap-2">
+                            <button id="empty-add-folder-btn" class="px-3 py-1.5 text-xs font-medium bg-slate-900 hover:bg-slate-800 text-indigo-300 border border-slate-800 rounded-lg transition">
+                                Create Blank Folder
+                            </button>
+                            <button id="clone-all-btn" class="px-3 py-1.5 text-xs font-medium bg-indigo-950/40 hover:bg-indigo-900/40 text-indigo-300 border border-indigo-900/40 rounded-lg transition">
+                                Clone All Links
+                            </button>
+                        </div>
+                    </div>
+                `;
+                document.getElementById('empty-add-folder-btn')?.addEventListener('click', createNewFolder);
+                
+                const cloneAll = document.getElementById('clone-all-btn');
+                if (cloneAll) {
+                    if (leftTree.length === 0) {
+                        cloneAll.className += " opacity-50 cursor-not-allowed";
+                        cloneAll.title = "Upload bookmarks on the left first.";
+                    } else {
+                        cloneAll.addEventListener('click', () => {
+                            rightTree = leftTree.map(cloneTreeWithNewIds);
+                            showToast("Duplicated source bookmarks into the workspace!", "info");
+                            renderTrees();
+                        });
+                    }
+                }
+            } else if (filteredRight.length === 0) {
+                rightContainer.innerHTML = `
+                    <div class="text-center py-12">
+                        <svg class="text-slate-600 mx-auto mb-2" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                        <p class="text-sm text-slate-400">No matching workspace bookmarks found.</p>
+                        <button id="clear-right-search-link" class="text-xs text-indigo-400 underline mt-1">Clear search</button>
+                    </div>
+                `;
+                document.getElementById('clear-right-search-link')?.addEventListener('click', () => {
+                    document.getElementById('right-search').value = '';
+                    rightFilter = '';
+                    document.getElementById('right-search-clear').classList.add('hidden');
+                    renderTrees();
+                });
+            } else {
+                const headerBadge = document.createElement('div');
+                headerBadge.className = "bg-slate-900/40 p-2 rounded-lg text-xs text-slate-400 mb-3 flex items-center justify-between border border-slate-800/40";
+                headerBadge.innerHTML = `
+                    <span>💡 Drag-and-drop to reorder, nest, or drag between items.</span>
+                    <div class="flex gap-2">
+                        <button id="clear-workspace-btn" class="text-red-400 hover:text-red-300 font-semibold">Clear All</button>
+                        <span class="text-slate-600">|</span>
+                        <span class="font-semibold text-slate-300">Selected: ${countBookmarks(rightTree)}</span>
+                    </div>
+                `;
+                rightContainer.appendChild(headerBadge);
+                document.getElementById('clear-workspace-btn').addEventListener('click', () => {
+                    rightTree = [];
+                    showToast("Workspace cleared.", "info");
+                    renderTrees();
+                });
+
+                filteredRight.forEach(node => {
+                    rightContainer.appendChild(createTreeElement(node, 'right'));
+                });
+            }
+        }
+
+        // --- Create a New Workspace Folder ---
+        function createNewFolder() {
+            const newFolder = {
+                id: generateUniqueId('folder-new'),
+                type: 'folder',
+                title: 'New Folder',
+                children: []
+            };
+            rightTree.push(newFolder);
+            editingNode = { id: newFolder.id, title: newFolder.title, type: 'folder' };
+            showToast('Created empty folder. Type a name to edit.', 'info');
+            renderTrees();
+        }
+
+        // --- Trigger Demo Loading ---
+        function loadDemoData() {
+            leftTree = deepCopy(DEMO_BOOKMARKS);
+            showToast("Successfully loaded pre-designed Dev/Design bookmarks into the left pane!", "info");
+            renderTrees();
+        }
+
+        // --- Export Engine (Compatible Chrome Netscape format generation) ---
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function generateBookmarkHTML(nodes) {
+            let html = `<!DOCTYPE NETSCAPE-Bookmark-file-1>
+<!-- This is an automatically generated file.
+     Created via the Bookmark Splitter App. -->
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=UTF-8">
+<TITLE>Bookmarks Export</TITLE>
+<H1>Bookmarks</H1>
+<DL><p>
+`;
+
+            const renderNode = (node, depth = 1) => {
+                const indent = '    '.repeat(depth);
+                if (node.type === 'folder') {
+                    let str = `${indent}<DT><H3 ADD_DATE="${Math.floor(Date.now() / 1000)}" LAST_MODIFIED="${Math.floor(Date.now() / 1000)}">${escapeHtml(node.title)}</H3>\n`;
+                    str += `${indent}<DL><p>\n`;
+                    if (node.children && node.children.length > 0) {
+                        node.children.forEach(child => {
+                            str += renderNode(child, depth + 1);
+                        });
+                    }
+                    str += `${indent}</DL><p>\n`;
+                    return str;
+                } else {
+                    return `${indent}<DT><A HREF="${escapeHtml(node.url || '#')}" ADD_DATE="${Math.floor(Date.now() / 1000)}">${escapeHtml(node.title)}</A>\n`;
+                }
+            };
+
+            nodes.forEach(node => {
+                html += renderNode(node);
+            });
+
+            html += `</DL><p>\n`;
+            return html;
+        }
+
+        function handleExport() {
+            if (rightTree.length === 0) {
+                showToast("Your workspace is empty. Move items into the workspace to export!", "error");
+                return;
+            }
+
+            const htmlContent = generateBookmarkHTML(rightTree);
+            const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `split_bookmarks_${new Date().toISOString().slice(0, 10)}.html`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            
+            showToast('Export file downloaded successfully!', 'success');
+        }
+
+        // --- Initialize Global Application Event Listeners ---
+        window.addEventListener('DOMContentLoaded', () => {
+            
+            // Upload Trigger Events
+            const fileUploader = document.getElementById('file-uploader');
+            document.getElementById('upload-trigger-btn').addEventListener('click', () => {
+                fileUploader.click();
+            });
+
+            fileUploader.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const parsed = parseBookmarkHTML(event.target.result);
+                        if (parsed.length === 0) {
+                            showToast('Could not parse standard bookmark structure. Please make sure this is an exported HTML bookmark file.', 'error');
+                        } else {
+                            leftTree = parsed;
+                            showToast(`Successfully imported ${countBookmarks(parsed)} bookmarks!`, 'success');
+                            renderTrees();
+                        }
+                    } catch (err) {
+                        showToast('Error parsing file.', 'error');
+                    }
+                };
+                reader.readAsText(file);
+            });
+
+            // Demo & Action buttons setup
+            document.getElementById('load-demo-btn').addEventListener('click', loadDemoData);
+            document.getElementById('add-folder-btn').addEventListener('click', createNewFolder);
+            document.getElementById('export-btn').addEventListener('click', handleExport);
+
+            // Left Panel Live Search filtering
+            const leftSearchInput = document.getElementById('left-search');
+            const leftSearchClear = document.getElementById('left-search-clear');
+            leftSearchInput.addEventListener('input', (e) => {
+                leftFilter = e.target.value;
+                if (leftFilter) {
+                    leftSearchClear.classList.remove('hidden');
+                } else {
+                    leftSearchClear.classList.add('hidden');
+                }
+                renderTrees();
+            });
+            leftSearchClear.addEventListener('click', () => {
+                leftSearchInput.value = '';
+                leftFilter = '';
+                leftSearchClear.classList.add('hidden');
+                renderTrees();
+            });
+
+            // Right Workspace Live Search filtering
+            const rightSearchInput = document.getElementById('right-search');
+            const rightSearchClear = document.getElementById('right-search-clear');
+            rightSearchInput.addEventListener('input', (e) => {
+                rightFilter = e.target.value;
+                if (rightFilter) {
+                    rightSearchClear.classList.remove('hidden');
+                } else {
+                    rightSearchClear.classList.add('hidden');
+                }
+                renderTrees();
+            });
+            rightSearchClear.addEventListener('click', () => {
+                rightSearchInput.value = '';
+                rightFilter = '';
+                rightSearchClear.classList.add('hidden');
+                renderTrees();
+            });
+
+            // Generic Workspace empty area drops (allows dropping anywhere on right container)
+            const rightWorkspacePane = document.getElementById('right-workspace-pane');
+            rightWorkspacePane.addEventListener('dragover', (e) => {
+                e.preventDefault();
+            });
+
+            rightWorkspacePane.addEventListener('drop', (e) => {
+                // Drop direct container level if not already targeted on specific node
+                if (currentDropTargetId) return; 
+                e.preventDefault();
+
+                if (!draggedNode) return;
+
+                const finalNode = dragSource === 'left' ? cloneTreeWithNewIds(draggedNode) : draggedNode;
+                let updatedRightTree = [...rightTree];
+
+                if (dragSource === 'right') {
+                    updatedRightTree = removeItemFromTree(updatedRightTree, draggedNode.id);
+                }
+
+                updatedRightTree.push(finalNode);
+                rightTree = updatedRightTree;
+
+                showToast(`Added "${finalNode.title}" to workspace root.`);
+                draggedNode = null;
+                dragSource = null;
+                renderTrees();
+            });
+
+            // Start Canvas rendering
+            renderTrees();
+        });
+    </script>
+</body>
+</html>
