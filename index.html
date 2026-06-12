@@ -100,7 +100,7 @@
                 </div>
 
                 <div class="flex items-center gap-2">
-                    <input type="file" id="file-uploader" accept=".html" class="hidden" />
+                    <input type="file" id="file-uploader" accept=".html,.htm" multiple class="hidden" />
                     <button
                         id="upload-trigger-btn"
                         class="px-3.5 py-2 text-xs font-medium bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white rounded-lg shadow-lg shadow-emerald-700/10 transition-all flex items-center gap-1.5"
@@ -110,7 +110,7 @@
                             <polyline points="17 8 12 3 7 8"/>
                             <line x1="12" x2="12" y1="3" y2="15"/>
                         </svg>
-                        Upload HTML
+                        Upload HTML Files
                     </button>
                 </div>
             </div>
@@ -1056,26 +1056,41 @@
                 fileUploader.click();
             });
 
-            fileUploader.addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
+            fileUploader.addEventListener('change', async (e) => {
+                const files = Array.from(e.target.files || []);
+                if (files.length === 0) return;
 
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    try {
-                        const parsed = parseBookmarkHTML(event.target.result);
-                        if (parsed.length === 0) {
-                            showToast('Could not parse standard bookmark structure. Please make sure this is an exported HTML bookmark file.', 'error');
-                        } else {
-                            leftTree = parsed;
-                            showToast(`Successfully imported ${countBookmarks(parsed)} bookmarks!`, 'success');
-                            renderTrees();
+                const parseFile = (file) => new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        try {
+                            const parsed = parseBookmarkHTML(event.target.result);
+                            resolve(parsed);
+                        } catch (err) {
+                            reject(err);
                         }
-                    } catch (err) {
-                        showToast('Error parsing file.', 'error');
+                    };
+                    reader.onerror = () => reject(new Error('File read failed'));
+                    reader.readAsText(file);
+                });
+
+                try {
+                    const parsedLists = await Promise.all(files.map(parseFile));
+                    const combined = parsedLists.flat();
+
+                    if (combined.length === 0) {
+                        showToast('Could not parse any valid bookmark structure. Please upload standard exported bookmark HTML files.', 'error');
+                    } else {
+                        leftTree = [...leftTree, ...combined];
+                        const totalBookmarks = countBookmarks(combined);
+                        showToast(`Successfully imported ${totalBookmarks} bookmarks from ${files.length} file${files.length === 1 ? '' : 's'}!`, 'success');
+                        renderTrees();
                     }
-                };
-                reader.readAsText(file);
+                } catch (err) {
+                    showToast('Error parsing uploaded files.', 'error');
+                } finally {
+                    fileUploader.value = '';
+                }
             });
 
             // Demo & Action buttons setup
